@@ -1,0 +1,5 @@
+build
+vendor
+test/support/*
+.doxygen
+doc
