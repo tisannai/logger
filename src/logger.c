@@ -165,7 +165,7 @@ static lg_grp_t lg_grp_new( lg_host_t host, lg_grp_type_t type, const char* name
     grp->prefix = sx_nil;
     grp->postfix = sx_nil;
     grp->logs = sx_nil;
-    grp->active = sx_true;
+    grp->active = host->conf_active;
     grp->top = sx_nil;
     grp->subs = sx_nil;
 
@@ -295,7 +295,18 @@ static void lg_grp_attach_sub( lg_host_t host, lg_grp_t top, lg_grp_t sub )
 {
     gr_add( &top->subs, sub );
     sub->top = top;
-    lg_grp_join_grp_obj( host, sub, top );
+}
+
+
+static void lg_grp_detach_sub( lg_host_t host, lg_grp_t top, lg_grp_t sub )
+{
+    gr_pos_t idx;
+
+    idx = gr_find( top->subs, sub );
+    if ( idx != GR_NOT_INDEX ) {
+        gr_delete_at( top->subs, idx );
+        sub->top = sx_nil;
+    }
 }
 
 
@@ -326,17 +337,19 @@ static void lg_host_log_del_fn( gr_d key, gr_d value, void* arg )
  */
 
 
-lg_host_t lg_host_new( sx_t env )
+lg_host_t lg_host_new( sx_t data )
 {
     lg_host_t host;
 
     host = gr_malloc( sizeof( lg_host_s ) );
-    host->env = env;
+    host->data = data;
     host->grps = mp_new_full( mp_key_hash_cstr, mp_key_comp_cstr, 16, 50 );
     host->logs = mp_new_full( mp_key_hash_cstr, mp_key_comp_cstr, 16, 50 );
     host->buf = sl_new( PATH_MAX + 16 );
 
-    host->quiet = sx_false;
+    host->disabled = sx_false;
+
+    host->conf_active = sx_true;
 
     return host;
 }
@@ -350,6 +363,34 @@ void lg_host_del( lg_host_t host )
     mp_destroy( host->logs );
     sl_del( &host->buf );
     gr_free( host );
+}
+
+
+sx_t lg_host_data( lg_host_t host )
+{
+    return host->data;
+}
+
+
+void lg_host_y( lg_host_t host )
+{
+    host->disabled = sx_false;
+}
+
+
+void lg_host_n( lg_host_t host )
+{
+    host->disabled = sx_true;
+}
+
+
+void lg_host_config( lg_host_t host, const char* config, sx_bool_t value )
+{
+    if ( 0 ) {
+    } else if ( !strcmp( config, "active" ) ) {
+        host->conf_active = value;
+    } else {
+    }
 }
 
 
@@ -385,6 +426,7 @@ lg_grp_t lg_grp_sub( lg_host_t host, const char* topname, const char* name )
 
     grp = lg_grp_new( host, LG_GRP_TYPE_GRP, host->buf );
     lg_grp_attach_sub( host, top, grp );
+    lg_grp_join_grp_obj( host, grp, top );
 
     return grp;
 }
@@ -429,16 +471,7 @@ void lg_grp_n( lg_host_t host, const char* name )
 
 void lg_grp_join_grp( lg_host_t host, const char* name, const char* joinee )
 {
-    lg_grp_t grp;
-    lg_grp_t join_to;
-
-    grp = lg_host_get_grp( host, name );
-    join_to = lg_host_get_grp( host, joinee );
-
-    if ( join_to->type == LG_GRP_TYPE_TOP )
-        lg_grp_attach_sub( host, join_to, grp );
-    else
-        lg_grp_join_grp_obj( host, grp, join_to );
+    lg_grp_join_grp_obj( host, lg_host_get_grp( host, name ), lg_host_get_grp( host, joinee ) );
 }
 
 
@@ -465,11 +498,7 @@ void lg_grp_merge_grp( lg_host_t host, const char* name, const char* joinee )
         lg_assert( 0 ); // GCOV_EXCL_LINE
 
     lg_grp_del_logs( grp );
-
-    if ( join_to->type == LG_GRP_TYPE_TOP )
-        lg_grp_attach_sub( host, join_to, grp );
-    else
-        lg_grp_join_grp_obj( host, grp, join_to );
+    lg_grp_join_grp_obj( host, grp, join_to );
 }
 
 
@@ -487,6 +516,18 @@ void lg_grp_merge_file( lg_host_t host, const char* name, const char* joinee )
 }
 
 
+void lg_grp_attach( lg_host_t host, const char* top, const char* name )
+{
+    lg_grp_attach_sub( host, lg_host_get_grp( host, top ), lg_host_get_grp( host, name ) );
+}
+
+
+void lg_grp_detach( lg_host_t host, const char* top, const char* name )
+{
+    lg_grp_detach_sub( host, lg_host_get_grp( host, top ), lg_host_get_grp( host, name ) );
+}
+
+
 void lg( lg_host_t host, const char* name, const char* format, ... )
 {
     va_list ap;
@@ -494,7 +535,7 @@ void lg( lg_host_t host, const char* name, const char* format, ... )
     lg_grp_t grp;
     grp = lg_host_get_grp( host, name );
 
-    if ( grp->active ) {
+    if ( !host->disabled && grp->active ) {
         va_start( ap, format );
         lg_grp_write( host, grp, 1, format, ap );
         va_end( ap );
@@ -509,7 +550,7 @@ void lgw( lg_host_t host, const char* name, const char* format, ... )
     lg_grp_t grp;
     grp = lg_host_get_grp( host, name );
 
-    if ( grp->active ) {
+    if ( !host->disabled && grp->active ) {
         va_start( ap, format );
         lg_grp_write( host, grp, 0, format, ap );
         va_end( ap );

@@ -69,6 +69,7 @@ void test_basic( void )
 
     host = lg_host_new( sx_nil );
     TEST_ASSERT_TRUE( host != sx_nil );
+    lg_host_config( host, "active", sx_true );
 
     lg_grp_log( host, "simple", "test/out/simple.log" );
     lg( host, "simple", "my message is this: %s, %s", message, message );
@@ -88,8 +89,9 @@ void test_top( void )
 
     prepare_testout();
 
-    host = lg_host_new( sx_nil );
+    host = lg_host_new( message );
     TEST_ASSERT_TRUE( host != sx_nil );
+    TEST_ASSERT_TRUE( !strcmp ( message, ((char*)lg_host_data( host ) ) ) );
 
     lg_grp_top( host, "simple", "test/out/simple.log", prefix, sx_nil );
     lg( host, "simple", "for message: %s", message );
@@ -156,6 +158,8 @@ void test_files( void )
     lg_grp_merge_grp( host, "do_writes/sub2", "do_writes/sub1" );
     lg_grp_merge_grp( host, "do_writes", "do_writes/sub1" );
     lg_grp_merge_grp( host, "do_writes/sub3", "do_writes" );
+    lg_grp_attach( host, "do_writes/sub3", "do_writes" );
+    lg_grp_detach( host, "do_writes/sub3", "do_writes" );
 
     lgw( host, "do_writes/sub1", "3" );
     lgw( host, "do_writes/sub2", "4\n" );
@@ -163,6 +167,12 @@ void test_files( void )
 
     lg_grp_log( host, "stdout", "<stdout>" );
     lgw( host, "stdout", "" );
+
+    lg_host_y( host );
+    lg_host_n( host );
+    lgw( host, "do_writes/sub1", "3" );
+    lgw( host, "do_writes/sub2", "4\n" );
+    lgw( host, "do_writes/sub3", "5" );
 
     lg_host_del( host );
 
