@@ -12,8 +12,6 @@
 
 
 
-#include <stdlib.h>
-#include <stdint.h>
 #include <sixten.h>
 #include <gromer.h>
 #include <mapper.h>
@@ -30,27 +28,27 @@
 #endif
 
 
-sx_struct( lg_host )
+st_struct( lg_host )
 {
-    sx_t      data;        /**< User data. */
+    st_t      data;        /**< User data. */
     mp_t      grps;        /**< Logger Groups. */
     mp_t      logs;        /**< Logger Logs. */
-    sx_bool_t disabled;    /**< Silence Host. */
+    st_bool_t disabled;    /**< Silence Host. */
     sl_t      buf;         /**< String building buffer. */
-    sx_bool_t conf_active; /**< Config: active. */
+    st_bool_t conf_active; /**< Config: active. */
 };
 
 
-sx_struct_type( lg_grp );
-sx_struct_type( lg_log );
+st_struct_type( lg_grp );
+st_struct_type( lg_log );
 
-sx_enum( lg_log_type ){ LG_LOG_TYPE_NONE = 0,
+st_enum( lg_log_type ){ LG_LOG_TYPE_NONE = 0,
                         LG_LOG_TYPE_FILE,
                         LG_LOG_TYPE_STDOUT,
                         LG_LOG_TYPE_GRPREF,
                         LG_LOG_TYPE_LOGREF };
 
-sx_struct( lg_log )
+st_struct( lg_log )
 {
     lg_log_type_t type; /**< Log type. */
     char*         name; /**< Log file name ("<stdout>" for STDOUT). */
@@ -76,16 +74,16 @@ typedef void ( *lg_grp_fn_p )( const lg_host_t host,
                                sl_p            outbuf );
 
 
-sx_enum( lg_grp_type ){ LG_GRP_TYPE_NONE = 0, LG_GRP_TYPE_TOP, LG_GRP_TYPE_GRP };
+st_enum( lg_grp_type ){ LG_GRP_TYPE_NONE = 0, LG_GRP_TYPE_TOP, LG_GRP_TYPE_GRP };
 
-sx_struct( lg_grp )
+st_struct( lg_grp )
 {
     lg_grp_type_t type;    /**< Type. */
     char*         name;    /**< Name. */
     lg_grp_fn_p   prefix;  /**< Prefix function. */
     lg_grp_fn_p   postfix; /**< Postfix function. */
     gr_t          logs;    /**< List of Logs. */
-    sx_bool_t     active;  /**< Grp is active? */
+    st_bool_t     active;  /**< Grp is active? */
     lg_grp_t      top;     /**< Grp top (if any). */
     gr_t          subs;    /**< List of Subs (if any). */
 };
@@ -98,7 +96,7 @@ sx_struct( lg_grp )
  *
  * @return Host.
  */
-lg_host_t lg_host_new( sx_t data );
+lg_host_t lg_host_new( st_t data );
 
 
 /**
@@ -116,7 +114,7 @@ void lg_host_del( lg_host_t host );
  *
  * @return User data.
  */
-sx_t lg_host_data( lg_host_t host );
+st_t lg_host_data( lg_host_t host );
 
 
 /**
@@ -144,7 +142,7 @@ void lg_host_n( lg_host_t host );
  * @param config Config name.
  * @param value  Config value.
  */
-void lg_host_config( lg_host_t host, const char* config, sx_bool_t value );
+void lg_host_config( lg_host_t host, const char* config, st_bool_t value );
 
 
 /**

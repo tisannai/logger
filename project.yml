@@ -1,12 +1,16 @@
 ---
 
 :project:
+  :name: logger
   :use_exceptions: FALSE
   :use_test_preprocessor: TRUE
   :use_auxiliary_dependencies: TRUE
   :build_root: build
   :release_build: TRUE
   :test_file_prefix: test_
+  :which_ceedling: vendor/ceedling
+  :default_tasks:
+    - test:all
 
 :release_build:
   :output: liblogger.so.0.0.1
@@ -60,7 +64,7 @@
         - -Wall
 #        - -Wextra
         - -Wstrict-prototypes
-        - -Werror
+#        - -Werror
         - -fdata-sections
         - -ffunction-sections
     :link:
@@ -74,7 +78,7 @@
         - -Wall
 #        - -Wextra
         - -Wstrict-prototypes
-        - -Werror
+#        - -Werror
         - -fdata-sections
         - -ffunction-sections
     :link:
@@ -86,7 +90,7 @@
     :executable: gcc
     :arguments:
       - ${1}
-      - -lm -lgromer -lmapper -lslinky -lalogir
+      - -lm  -lgromer -lmapper -lslinky -lalogir
       - -o ${2}
   :gcov_linker:
     :executable: gcc
@@ -94,15 +98,16 @@
       - -fprofile-arcs
       - -ftest-coverage
       - ${1}
-      - -lm -lgromer -lmapper -lslinky -lalogir
+      - -lm  -lgromer -lmapper -lslinky -lalogir
       - -o ${2}
   :release_compiler:
     :executable: gcc
     :arguments:
       - ${1}
       - -Wall
-      - -std=c11
-      - -g
+#      - -std=c11
+#      - -g
+      - -O2
       - -fPIC
       - -c
       - -o ${2}
@@ -120,6 +125,10 @@
   :enabled:
     - stdout_pretty_tests_report
     - module_generator
+    - raw_output_report
     - gcov
+
+:gcov:
+    :html_report_type: detailed
 
 ...

@@ -3,3 +3,10 @@ vendor
 test/support/*
 .doxygen
 doc
+build
+project.yml
+rakefile.rb
+vendor
+test/support/*
+.doxygen
+doc

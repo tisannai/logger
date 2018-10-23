@@ -67,9 +67,9 @@ void test_basic( void )
 
     prepare_testout();
 
-    host = lg_host_new( sx_nil );
-    TEST_ASSERT_TRUE( host != sx_nil );
-    lg_host_config( host, "active", sx_true );
+    host = lg_host_new( st_nil );
+    TEST_ASSERT_TRUE( host != st_nil );
+    lg_host_config( host, "active", st_true );
 
     lg_grp_log( host, "simple", "test/out/simple.log" );
     lg( host, "simple", "my message is this: %s, %s", message, message );
@@ -90,20 +90,20 @@ void test_top( void )
     prepare_testout();
 
     host = lg_host_new( message );
-    TEST_ASSERT_TRUE( host != sx_nil );
+    TEST_ASSERT_TRUE( host != st_nil );
     TEST_ASSERT_TRUE( !strcmp ( message, ((char*)lg_host_data( host ) ) ) );
 
-    lg_grp_top( host, "simple", "test/out/simple.log", prefix, sx_nil );
+    lg_grp_top( host, "simple", "test/out/simple.log", prefix, st_nil );
     lg( host, "simple", "for message: %s", message );
     lg_grp_sub( host, "simple", "sub" );
     lg( host, "simple/sub", "sub message: %s", message );
 
-    lg_grp_top( host, "top", "test/out/top.log", sx_nil, postfix );
+    lg_grp_top( host, "top", "test/out/top.log", st_nil, postfix );
     lgw( host, "top", "1" );
     lg_grp_sub( host, "top", "sub" );
     lgw( host, "top/sub", "2" );
     lg_grp_prefix( host, "top", empty_prefix );
-    lg_grp_postfix( host, "top", sx_nil );
+    lg_grp_postfix( host, "top", st_nil );
     lgw( host, "top", "3" );
     lgw( host, "top/sub", "4" );
     lg_grp_n( host, "top" );
@@ -133,19 +133,19 @@ void test_files( void )
 
     prepare_testout();
 
-    host = lg_host_new( sx_nil );
-    TEST_ASSERT_TRUE( host != sx_nil );
+    host = lg_host_new( st_nil );
+    TEST_ASSERT_TRUE( host != st_nil );
 
-    lg_grp_top( host, "no_writes", "test/out/no_writes.log", sx_nil, sx_nil );
+    lg_grp_top( host, "no_writes", "test/out/no_writes.log", st_nil, st_nil );
     TEST_ASSERT_TRUE( check_file_exists( "test/out/no_writes.log" ) == 0 );
 
-    lg_grp_top( host, "do_writes", sx_nil, sx_nil, sx_nil );
+    lg_grp_top( host, "do_writes", st_nil, st_nil, st_nil );
     lg_grp_sub( host, "do_writes", "sub1" );
-    lg_grp_log( host, "do_writes/sub3", sx_nil );
+    lg_grp_log( host, "do_writes/sub3", st_nil );
     lg_grp_join_grp( host, "do_writes/sub3", "do_writes" );
     lg_grp_join_file( host, "do_writes/sub1", "test/out/do_writes.log" );
 
-    lg_grp_log( host, "do_writes/sub2", sx_nil );
+    lg_grp_log( host, "do_writes/sub2", st_nil );
     lg_grp_join_grp( host, "do_writes/sub2", "do_writes/sub1" );
     lg_grp_join_file( host, "do_writes/sub2", "test/out/do_writes2.log" );
 

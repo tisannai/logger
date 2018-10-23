@@ -7,9 +7,11 @@
  *
  */
 
-#include <limits.h>
 
 #include "logger.h"
+
+#include <linux/limits.h>
+#include <string.h>
 
 void lg_void_assert( void );
 
@@ -30,7 +32,7 @@ static lg_grp_t lg_host_get_grp( lg_host_t host, const char* name )
     else
         lg_assert( 0 ); // GCOV_EXCL_LINE
 
-    return sx_nil;
+    return st_nil;
 }
 
 
@@ -42,7 +44,7 @@ static lg_grp_t lg_host_check_grp( lg_host_t host, const char* name )
 
 static void lg_host_add_grp( lg_host_t host, lg_grp_t grp )
 {
-    if ( lg_host_check_grp( host, grp->name ) == sx_nil ) {
+    if ( lg_host_check_grp( host, grp->name ) == st_nil ) {
         mp_put_key( host->grps, grp->name, grp );
     } else {
         lg_assert( 0 ); // GCOV_EXCL_LINE
@@ -70,7 +72,7 @@ static lg_log_t lg_log_new( lg_log_type_t type, const char* name )
     log->type = type;
     if ( name )
         log->name = strdup( name );
-    log->fh = sx_nil;
+    log->fh = st_nil;
 
     return log;
 }
@@ -96,7 +98,7 @@ static lg_log_t lg_log_new_file( lg_host_t host, const char* name )
     if ( !strcmp( name, "<stdout>" ) ) {
 
         file = lg_host_check_log( host, name );
-        if ( file == sx_nil ) {
+        if ( file == st_nil ) {
             file = lg_log_new( LG_LOG_TYPE_STDOUT, name );
             file->fh = stdout;
             lg_host_add_log( host, file );
@@ -110,7 +112,7 @@ static lg_log_t lg_log_new_file( lg_host_t host, const char* name )
         sl_refresh( host->buf );
 
         file = lg_host_check_log( host, host->buf );
-        if ( file == sx_nil ) {
+        if ( file == st_nil ) {
             file = lg_log_new( LG_LOG_TYPE_FILE, host->buf );
             lg_host_add_log( host, file );
         }
@@ -126,9 +128,9 @@ static void lg_log_write( lg_log_t log, const sl_t msg )
 {
     if ( log->type == LG_LOG_TYPE_FILE ) {
 
-        if ( log->fh == sx_nil ) {
+        if ( log->fh == st_nil ) {
             log->fh = fopen( log->name, "w" );
-            if ( log->fh == sx_nil )
+            if ( log->fh == st_nil )
                 lg_assert( 0 ); // GCOV_EXCL_LINE
         }
 
@@ -162,12 +164,12 @@ static lg_grp_t lg_grp_new( lg_host_t host, lg_grp_type_t type, const char* name
     grp = gr_malloc( sizeof( lg_grp_s ) );
     grp->type = type;
     grp->name = strdup( name );
-    grp->prefix = sx_nil;
-    grp->postfix = sx_nil;
-    grp->logs = sx_nil;
+    grp->prefix = st_nil;
+    grp->postfix = st_nil;
+    grp->logs = st_nil;
     grp->active = host->conf_active;
-    grp->top = sx_nil;
-    grp->subs = sx_nil;
+    grp->top = st_nil;
+    grp->subs = st_nil;
 
     lg_host_add_grp( host, grp );
 
@@ -204,7 +206,7 @@ static void lg_grp_enable( lg_grp_t grp )
         }
     }
 
-    grp->active = sx_true;
+    grp->active = st_true;
 }
 
 
@@ -217,7 +219,7 @@ static void lg_grp_disable( lg_grp_t grp )
         }
     }
 
-    grp->active = sx_false;
+    grp->active = st_false;
 }
 
 
@@ -228,7 +230,7 @@ static lg_grp_fn_p lg_grp_get_prefix( lg_grp_t grp )
     } else if ( grp->top ) {
         return lg_grp_get_prefix( grp->top );
     } else {
-        return sx_nil;
+        return st_nil;
     }
 }
 
@@ -240,7 +242,7 @@ static lg_grp_fn_p lg_grp_get_postfix( lg_grp_t grp )
     } else if ( grp->top ) {
         return lg_grp_get_postfix( grp->top );
     } else {
-        return sx_nil;
+        return st_nil;
     }
 }
 
@@ -305,7 +307,7 @@ static void lg_grp_detach_sub( lg_host_t host, lg_grp_t top, lg_grp_t sub )
     idx = gr_find( top->subs, sub );
     if ( idx != GR_NOT_INDEX ) {
         gr_delete_at( top->subs, idx );
-        sub->top = sx_nil;
+        sub->top = st_nil;
     }
 }
 
@@ -337,7 +339,7 @@ static void lg_host_log_del_fn( gr_d key, gr_d value, void* arg )
  */
 
 
-lg_host_t lg_host_new( sx_t data )
+lg_host_t lg_host_new( st_t data )
 {
     lg_host_t host;
 
@@ -347,9 +349,9 @@ lg_host_t lg_host_new( sx_t data )
     host->logs = mp_new_full( mp_key_hash_cstr, mp_key_comp_cstr, 16, 50 );
     host->buf = sl_new( PATH_MAX + 16 );
 
-    host->disabled = sx_false;
+    host->disabled = st_false;
 
-    host->conf_active = sx_true;
+    host->conf_active = st_true;
 
     return host;
 }
@@ -357,8 +359,8 @@ lg_host_t lg_host_new( sx_t data )
 
 void lg_host_del( lg_host_t host )
 {
-    mp_each_key( host->grps, lg_host_grp_del_fn, sx_nil );
-    mp_each_key( host->logs, lg_host_log_del_fn, sx_nil );
+    mp_each_key( host->grps, lg_host_grp_del_fn, st_nil );
+    mp_each_key( host->logs, lg_host_log_del_fn, st_nil );
     mp_destroy( host->grps );
     mp_destroy( host->logs );
     sl_del( &host->buf );
@@ -366,7 +368,7 @@ void lg_host_del( lg_host_t host )
 }
 
 
-sx_t lg_host_data( lg_host_t host )
+st_t lg_host_data( lg_host_t host )
 {
     return host->data;
 }
@@ -374,17 +376,17 @@ sx_t lg_host_data( lg_host_t host )
 
 void lg_host_y( lg_host_t host )
 {
-    host->disabled = sx_false;
+    host->disabled = st_false;
 }
 
 
 void lg_host_n( lg_host_t host )
 {
-    host->disabled = sx_true;
+    host->disabled = st_true;
 }
 
 
-void lg_host_config( lg_host_t host, const char* config, sx_bool_t value )
+void lg_host_config( lg_host_t host, const char* config, st_bool_t value )
 {
     if ( 0 ) {
     } else if ( !strcmp( config, "active" ) ) {
