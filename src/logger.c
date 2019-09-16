@@ -276,7 +276,7 @@ static void lg_grp_write( lg_host_t   host,
         postfix( host, grp, format, &host->buf );
 
     if ( newline )
-        sl_fill_with_char( &host->buf, '\n', 1 );
+        sl_append_char( &host->buf, '\n' );
 
     lg_grp_write_msg( host, grp, host->buf );
 }
