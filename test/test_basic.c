@@ -6,22 +6,34 @@
 #include <sys/types.h>
 
 
+
 /* ------------------------------------------------------------
  * Helper functions:
  */
 
 void prefix( const lg_host_t host, const lg_grp_t grp, const char* msg, sl_p outbuf )
 {
+    (void)host;
+    (void)grp;
+    (void)msg;
+
     sl_concatenate_c( outbuf, "prefix: " );
 }
 
 
 void empty_prefix( const lg_host_t host, const lg_grp_t grp, const char* msg, sl_p outbuf )
 {
+    (void)host;
+    (void)grp;
+    (void)msg;
+    (void)outbuf;
 }
 
 void postfix( const lg_host_t host, const lg_grp_t grp, const char* msg, sl_p outbuf )
 {
+    (void)host;
+    (void)grp;
+    (void)msg;
     sl_concatenate_c( outbuf, "\n" );
 }
 

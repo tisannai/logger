@@ -13,7 +13,8 @@
 
 
 #include <sixten.h>
-#include <gromer.h>
+// #include <gromer.h>
+#include <postor.h>
 #include <mapper.h>
 #include <slinky.h>
 
@@ -82,10 +83,14 @@ st_struct( lg_grp )
     char*         name;    /**< Name. */
     lg_grp_fn_p   prefix;  /**< Prefix function. */
     lg_grp_fn_p   postfix; /**< Postfix function. */
-    gr_t          logs;    /**< List of Logs. */
-    st_bool_t     active;  /**< Grp is active? */
-    lg_grp_t      top;     /**< Grp top (if any). */
-    gr_t          subs;    /**< List of Subs (if any). */
+                           //     gr_t          logs;    /**< List of Logs. */
+    po_s      logs_desc;   /**< Postor descriptor for logs. */
+    po_t      logs;        /**< List of Logs. */
+    st_bool_t active;      /**< Grp is active? */
+    lg_grp_t  top;         /**< Grp top (if any). */
+                           //     gr_t          subs;    /**< List of Subs (if any). */
+    po_s subs_desc;        /**< Postor descriptor for subs. */
+    po_t subs;             /**< List of Subs (if any). */
 };
 
 
